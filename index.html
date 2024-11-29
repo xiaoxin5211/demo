@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            background-image: url('b.png');/** 微信图**/
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .image-container {
+            position: fixed;
+            left: 170px; /* 指定悬浮球初始位置 */
+            top: 280px;  /* 指定悬浮球初始位置 */
+            cursor: grab;
+            transition: transform 0.2s ease;
+        }
+        .image-container img {
+            width: 40px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div class="image-container" id="draggable">
+
+    <img src="11.png" alt="" id="zoomable" loading="lazy">
+
+</div>
+
+<script>
+    // 拖动图片的代码，兼容手机触摸事件，模仿苹果悬浮球效果
+    const draggable = document.getElementById('draggable');
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    const startDrag = (e) => {
+        isDragging = true;
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - draggable.getBoundingClientRect().left;
+        offsetY = clientY - draggable.getBoundingClientRect().top;
+        draggable.style.cursor = 'grabbing';
+    };
+
+    const onDrag = (e) => {
+        if (!isDragging) return;
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        const newX = clientX - offsetX;
+        const newY = clientY - offsetY;
+
+        // 边界检查，确保悬浮球不会超出屏幕
+        const maxX = window.innerWidth - draggable.offsetWidth;
+        const maxY = window.innerHeight - draggable.offsetHeight;
+
+        if (newX < 0 || newY < 0 || newX > maxX || newY > maxY) {
+            draggable.style.display = 'none';
+            return;
+        }
+
+        draggable.style.left = `${Math.min(Math.max(newX, 0), maxX)}px`;
+        draggable.style.top = `${Math.min(Math.max(newY, 0), maxY)}px`;
+    };
+
+    const endDrag = () => {
+        isDragging = false;
+        if (draggable) draggable.style.cursor = 'grab';
+    };
+
+    draggable.addEventListener('mousedown', startDrag);
+    draggable.addEventListener('touchstart', startDrag);
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag);
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    // 点击放大/缩小图片的代码
+    const zoomable = document.getElementById('zoomable');
+    let currentScale = 0.5;
+    zoomable.style.transform = `scale(${currentScale})`;
+
+    zoomable.addEventListener('click', () => {
+        currentScale += 0.5;
+        zoomable.style.transform = `scale(${currentScale})`;
+    });
+
+    // // 手势放大功能
+    // zoomable.addEventListener('wheel', (e) => {
+    //     e.preventDefault();
+    //     if (e.deltaY < 0) {
+    //         currentScale += 0.1;
+    //     } else {
+    //         currentScale = Math.max(0.5, currentScale - 0.1);
+    //     }
+    //     zoomable.style.transform = `scale(${currentScale})`;
+    // });
+</script>
+
+</body>
+</html>
